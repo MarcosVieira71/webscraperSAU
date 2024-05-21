@@ -48,29 +48,28 @@ def save_log(text: str):
 def sau_goto(pg, menu_item: str):
     if menu_item == 'Horários e salas de aula':
         pg.get_by_text("Horários e salas de aula").click()
-        content = pg.inner_html('#pnlQuadHora')
+        content = pg.inner_html('#pnlListDisc')
         elemento = getClasses(content)
         for k,v in elemento.items():
-            print(f"{k}: {v}, {len(v)}")
-
-def extractClass(container):
-    class_elements = container.find_all('div', class_=['quadroHora_dcp2Hora', 'quadroHora_dcpHora'])
-    classes_info = []
-    for div in class_elements:
-        class_texts = [span.get_text() for span in div.find_all('span', class_='descricao_caixa')]
-        classes_info.append(class_texts)
-    return classes_info
+            print(f"{k} = {v} \n\n\n")
 
 
 def getClasses(contentHorarios):
     soup = BeautifulSoup(contentHorarios, 'html.parser')
-    days = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB"]
-    classesPerDay = {}
-    for dia in days:
-        container_id = f"pnlQuadHora_Container_{dia}"
-        container = soup.find(id=container_id)
-        classesPerDay[dia] = extractClass(container)
-    return classesPerDay
+    classesDict = {}
+    for i in range(1,16):
+        try:
+            codigoTurma = soup.find('span', id=f'rpHorarioSala_ctl0{i}_lblDisciplinaTurmaCod').text
+            codigoTurma = codigoTurma.split("/")
+            codigo = codigoTurma[0]
+            turma = codigoTurma[1]
+            nome_disciplina = soup.find('span', id=f'rpHorarioSala_ctl0{i}_lblDisciplinaTurmaNome').text
+            horario_sala = soup.find('span', id=f'rpHorarioSala_ctl0{i}_lblDiaHorarioSala').text
+            classDict = {"codigo": codigo, "horario": horario_sala, "turma": turma}
+            classesDict[nome_disciplina] = classDict
+        except:
+            break
+    return classesDict
  
 
-make_login(hide_browser=True)
+make_login(hide_browser=False)
